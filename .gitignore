@@ -1,0 +1,9 @@
+*.db
+*.git
+*.log
+*.tmp
+
+config.php
+cache/
+sessions/
+uploads/
