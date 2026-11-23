@@ -1,0 +1,14 @@
+{
+    "name": "sakots/hoshibbs",
+    "type": "project",
+    "require": {
+        "php": ">=8.2",
+        "ext-pdo_sqlite": "*",
+        "ext-session": "*",
+        "twig/twig": "^3.0"
+    },
+    "config": {
+        "platform": {"php": "8.2.0"},
+        "sort-packages": true
+    }
+}

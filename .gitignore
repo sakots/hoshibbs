@@ -3,7 +3,8 @@
 *.log
 *.tmp
 
-config.php
-cache/
+/hoshibbs/config.local.php
+/hoshibbs/vendor/
+/hoshibbs-data/
 sessions/
 uploads/
