@@ -2,7 +2,7 @@
 
 ## プロジェクト概要
 
-hoshibbsは、sqliteを使ったphpの2ch/5ch型掲示板。
+hoshibbsは、sqliteを使ったphpの2ch/5ch型掲示板群。複数掲示板運営に対応する。
 `hoshibbs/`ディレクトリをzip等で配布する。
 
 - アプリケーション本体: `hoshibbs/`
