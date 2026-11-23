@@ -3,21 +3,23 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 tmp=$(mktemp -d)
 pid=
-trap 'if [[ -n $pid ]]; then kill "$pid" 2>/dev/null || true; fi; rm -r -- "$tmp"' EXIT
-mkdir "$tmp/hoshibbs"
-cp hoshibbs/{index.php,config.php} "$tmp/hoshibbs/"
-cp -r hoshibbs/templates "$tmp/hoshibbs/"
-ln -s "$PWD/hoshibbs/vendor" "$tmp/hoshibbs/vendor"
-cat > "$tmp/hoshibbs/config.local.php" <<'PHP'
-<?php
-return ['boards' => ['general' => '雑談', 'help' => '質問']];
-PHP
+cleanup() {
+  if [[ -n $pid ]]; then
+    kill "$pid" 2>/dev/null || true
+    wait "$pid" || true
+  fi
+  rm -r -- "$tmp"
+}
+trap cleanup EXIT
 port=${HOSHIBBS_TEST_PORT:-18782}
-php -d session.save_path="$tmp" -S "127.0.0.1:$port" -t "$tmp/hoshibbs" > "$tmp/server.log" 2>&1 &
+TMPDIR="$tmp" bash scripts/serve-test.sh "$port" > "$tmp/server.log" 2>&1 &
 pid=$!
 url="http://127.0.0.1:$port/index.php"
 for _ in {1..50}; do
-  kill -0 "$pid"
+  if ! kill -0 "$pid"; then
+    cat "$tmp/server.log" >&2
+    exit 1
+  fi
   if curl -fsS "$url" > "$tmp/home" 2>/dev/null; then break; fi
   sleep 0.1
 done
