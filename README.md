@@ -11,8 +11,8 @@ SQLite を使う PHP 製の 2ch/5ch 型掲示板です。1 つの設置で複数
    ```php
    <?php
    return [
-       'boards' => ['general' => '雑談', 'help' => '質問'],
-       'database' => '/var/lib/hoshibbs/boards.sqlite',
+     'boards' => ['general' => '雑談', 'help' => '質問'],
+     'database' => '/var/lib/hoshibbs/boards.sqlite',
    ];
    ```
 

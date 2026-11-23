@@ -17,9 +17,9 @@ php -d session.save_path="$tmp" -S "127.0.0.1:$port" -t "$tmp/hoshibbs" > "$tmp/
 pid=$!
 url="http://127.0.0.1:$port/index.php"
 for _ in {1..50}; do
-    kill -0 "$pid"
-    if curl -fsS "$url" > "$tmp/home" 2>/dev/null; then break; fi
-    sleep 0.1
+  kill -0 "$pid"
+  if curl -fsS "$url" > "$tmp/home" 2>/dev/null; then break; fi
+  sleep 0.1
 done
 grep -F '質問' "$tmp/home"
 board="$url?board=general"

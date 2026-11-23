@@ -1,51 +1,51 @@
 <!doctype html>
 <html lang="ja">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ thread.title ?? boardName ?? 'hoshibbs' }}</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ thread.title ?? boardName ?? 'hoshibbs' }}</title>
 </head>
 <body>
 <nav aria-label="掲示板ナビゲーション">
-    <a href="./">掲示板一覧</a>
-    {% if thread is defined %}<a href="{{ boardUrl }}">{{ boardName }}</a>{% endif %}
+  <a href="./">掲示板一覧</a>
+  {% if thread is defined %}<a href="{{ boardUrl }}">{{ boardName }}</a>{% endif %}
 </nav>
 <main>
 {% if boards is defined %}
-    <h1>掲示板一覧</h1>
-    <ul>
-        {% for id, name in boards %}
-            <li><a href="?board={{ id|url_encode }}">{{ name }}</a></li>
-        {% endfor %}
-    </ul>
+  <h1>掲示板一覧</h1>
+  <ul>
+    {% for id, name in boards %}
+      <li><a href="?board={{ id|url_encode }}">{{ name }}</a></li>
+    {% endfor %}
+  </ul>
 {% elseif thread is defined %}
-    <h1>{{ thread.title }}</h1>
-    <ol>
-        <li><p>{{ thread.body|nl2br }}</p></li>
-        {% for reply in replies %}
-            <li><p>{{ reply|nl2br }}</p></li>
-        {% endfor %}
-    </ol>
+  <h1>{{ thread.title }}</h1>
+  <ol>
+    <li><p>{{ thread.body|nl2br }}</p></li>
+    {% for reply in replies %}
+      <li><p>{{ reply|nl2br }}</p></li>
+    {% endfor %}
+  </ol>
 {% else %}
-    <h1>{{ boardName }}</h1>
-    <ul>
-        {% for item in threads %}
-            <li><a href="{{ boardUrl }}&amp;thread={{ item.id }}">{{ item.title }}</a></li>
-        {% else %}
-            <li>スレッドはまだありません。</li>
-        {% endfor %}
-    </ul>
+  <h1>{{ boardName }}</h1>
+  <ul>
+    {% for item in threads %}
+      <li><a href="{{ boardUrl }}&amp;thread={{ item.id }}">{{ item.title }}</a></li>
+    {% else %}
+      <li>スレッドはまだありません。</li>
+    {% endfor %}
+  </ul>
 {% endif %}
 {% if csrf is defined %}
-    <h2>{{ thread is defined ? '返信' : 'スレッド作成' }}</h2>
-    <form method="post" action="{{ threadUrl ?? boardUrl }}">
-        <input type="hidden" name="csrf" value="{{ csrf }}">
-        {% if thread is not defined %}
-            <p><label>題名 <input name="title" required></label></p>
-        {% endif %}
-        <p><label>本文 <textarea name="body" required></textarea></label></p>
-        <button type="submit">投稿する</button>
-    </form>
+  <h2>{{ thread is defined ? '返信' : 'スレッド作成' }}</h2>
+  <form method="post" action="{{ threadUrl ?? boardUrl }}">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    {% if thread is not defined %}
+      <p><label>題名 <input name="title" required></label></p>
+    {% endif %}
+    <p><label>本文 <textarea name="body" required></label></p>
+    <button type="submit">投稿する</button>
+  </form>
 {% endif %}
 </main>
 </body>
