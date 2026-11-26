@@ -6,7 +6,7 @@
     "ext-mbstring": "*",
     "ext-pdo_sqlite": "*",
     "ext-session": "*",
-    "twig/twig": "^3.0"
+    "twig/twig": "^3.31.1"
   },
   "config": {
     "platform": {"php": "8.2.0"},
