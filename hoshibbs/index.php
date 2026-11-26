@@ -6,6 +6,7 @@ use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
 require __DIR__ . '/vendor/autoload.php';
+require __DIR__ . '/read-compat.php';
 
 $config = require __DIR__ . '/config.php';
 $localConfig = __DIR__ . '/config.local.php';
@@ -46,6 +47,18 @@ function openDatabase(string $path): PDO
     body TEXT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS replies_thread ON replies(thread_id);');
+  if ((int) $db->query('PRAGMA user_version')->fetchColumn() === 0) {
+    $db->exec('BEGIN IMMEDIATE');
+    if ((int) $db->query('PRAGMA user_version')->fetchColumn() === 0) {
+      $db->exec('ALTER TABLE threads ADD COLUMN public_key INTEGER;
+        ALTER TABLE threads ADD COLUMN posted_at INTEGER;
+        ALTER TABLE replies ADD COLUMN posted_at INTEGER;
+        UPDATE threads SET public_key = 1000000000 + id;
+        CREATE UNIQUE INDEX threads_public_key ON threads(board, public_key);
+        PRAGMA user_version = 1;');
+    }
+    $db->exec('COMMIT');
+  }
   return $db;
 }
 
@@ -54,6 +67,19 @@ try {
   if (!in_array($method, ['GET', 'HEAD', 'POST'], true)) {
     header('Allow: GET, HEAD, POST');
     respond(405, '許可されていないメソッドです。');
+  }
+  $path = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
+  $script = $_SERVER['SCRIPT_NAME'];
+  $prefix = '';
+  if (str_ends_with($script, '/index.php')) {
+    $prefix = substr($script, 0, -strlen('/index.php'));
+    if (str_starts_with($path, $prefix . '/')) {
+      $path = substr($path, strlen($prefix));
+    }
+  }
+  if ($path !== '/' && $path !== '/index.php') {
+    serveReadCompatibility($method, $path, $prefix, $config, is_file($localConfig) ? $localConfig : __DIR__ . '/config.php');
+    return;
   }
   $boards = $config['boards'];
   $board = $_GET['board'] ?? null;
@@ -103,10 +129,13 @@ try {
       respond(422, '必須項目を入力してください。');
     }
     if ($thread === null) {
-      $db->prepare('INSERT INTO threads (board, title, body) VALUES (?, ?, ?)')->execute([$board, $title, $body]);
+      $now = time();
+      $db->prepare('INSERT INTO threads (board, title, body, public_key, posted_at)
+        SELECT ?, ?, ?, MAX(CAST(? AS INTEGER), COALESCE(MAX(public_key) + 1, 0)), ? FROM threads WHERE board = ?')
+        ->execute([$board, $title, $body, $now, $now, $board]);
       $thread = (int) $db->lastInsertId();
     } else {
-      $db->prepare('INSERT INTO replies (thread_id, body) VALUES (?, ?)')->execute([$thread, $body]);
+      $db->prepare('INSERT INTO replies (thread_id, body, posted_at) VALUES (?, ?, ?)')->execute([$thread, $body, time()]);
     }
     header('Location: ' . $boardUrl . '&thread=' . $thread, true, 303);
     return;

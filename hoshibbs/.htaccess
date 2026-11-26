@@ -1,0 +1,2 @@
+RewriteEngine On
+RewriteRule ^(?:bbsmenu\.(?:html|json)|[a-z0-9][a-z0-9-]*/(?:subject\.txt|dat/[0-9]{10}\.dat)?|test/read\.cgi/[a-z0-9][a-z0-9-]*/[0-9]{10}/)$ index.php [END]
